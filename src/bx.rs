@@ -3,9 +3,8 @@ use chrono::Local;
 use reqwest::Client;
 use serde_json::json;
 use solana_client::client_error::{ClientError, ClientErrorKind, Result as ClientResult};
-use solana_rpc_client::spinner;
 use solana_sdk::{signature::Signature, transaction::Transaction};
-use std::{fs::OpenOptions, io::Write, str::FromStr, sync::Arc};
+use std::{fs::OpenOptions, io::Write, str::FromStr};
 
 use crate::Miner;
 
@@ -38,6 +37,8 @@ impl Miner {
             "tip": 5000
         });
 
+        println!("auth token {}", auth_token);
+
         let response: serde_json::Value = client
             .post(url)
             .json(&body)
@@ -45,11 +46,13 @@ impl Miner {
             .send()
             .await
             .map_err(|e| {
+                println!("Request Error: {}", e);
                 ClientError::from(ClientErrorKind::Custom(format!("Request error: {}", e)))
             })?
             .json()
             .await
             .map_err(|e| {
+                println!("Request JSON error: {}", e)
                 ClientError::from(ClientErrorKind::Custom(format!(
                     "JSON deserialization error: {}",
                     e
