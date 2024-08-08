@@ -52,7 +52,7 @@ impl Miner {
             .json()
             .await
             .map_err(|e| {
-                println!("Request JSON error: {}", e)
+                println!("Request JSON error: {}", e);
                 ClientError::from(ClientErrorKind::Custom(format!(
                     "JSON deserialization error: {}",
                     e
