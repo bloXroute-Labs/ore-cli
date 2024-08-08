@@ -93,6 +93,10 @@ impl Miner {
                     .unwrap();
                 tx.sign(&[&signer], hash);
 
+                let progress_bar = Arc::new(spinner::new_progress_bar());
+                progress_bar.set_message("Sending to Bloxroute...");
+
+
                 self.post_submit_v2(&tx, true, true, AUTH_TOKEN).await.ok()
             };
         }

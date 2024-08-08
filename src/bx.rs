@@ -3,8 +3,9 @@ use chrono::Local;
 use reqwest::Client;
 use serde_json::json;
 use solana_client::client_error::{ClientError, ClientErrorKind, Result as ClientResult};
+use solana_rpc_client::spinner;
 use solana_sdk::{signature::Signature, transaction::Transaction};
-use std::{fs::OpenOptions, io::Write, str::FromStr};
+use std::{fs::OpenOptions, io::Write, str::FromStr, sync::Arc};
 
 use crate::Miner;
 
@@ -54,6 +55,13 @@ impl Miner {
                     e
                 )))
             })?;
+
+        let progress_bar = Arc::new(spinner::new_progress_bar());
+
+        progress_bar.finish_with_message(format!(
+            "Trader API response: {}",
+            response
+        ));
 
         let signature = response["signature"].as_str().ok_or_else(|| {
             ClientError::from(ClientErrorKind::Custom(
