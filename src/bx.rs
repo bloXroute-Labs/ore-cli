@@ -56,12 +56,7 @@ impl Miner {
                 )))
             })?;
 
-        let progress_bar = Arc::new(spinner::new_progress_bar());
-
-        progress_bar.finish_with_message(format!(
-            "Trader API response: {}",
-            response
-        ));
+        println!("response {}", response);
 
         let signature = response["signature"].as_str().ok_or_else(|| {
             ClientError::from(ClientErrorKind::Custom(
