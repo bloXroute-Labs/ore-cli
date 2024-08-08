@@ -17,7 +17,7 @@ impl Miner {
         auth_token: &str,
     ) -> ClientResult<Signature> {
         let client = Client::new();
-        let url = "ny.solana.dex.blxrbdn.com";
+        let url = "https://ny.solana.dex.blxrbdn.com";
 
         let tx_data = base64::prelude::BASE64_STANDARD.encode(
             bincode::serialize(transaction).map_err(|e| {
@@ -38,6 +38,8 @@ impl Miner {
         });
 
         println!("auth token {}", auth_token);
+        println!("url {}", url);
+        println!("body {}", body);
 
         let response: serde_json::Value = client
             .post(url)
