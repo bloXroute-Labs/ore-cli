@@ -32,7 +32,7 @@ const MIN_SOL_BALANCE: f64 = 0.005;
 const RPC_RETRIES: usize = 0;
 const _SIMULATION_RETRIES: usize = 4;
 const GATEWAY_RETRIES: usize = 150;
-const CONFIRM_RETRIES: usize = 1;
+const CONFIRM_RETRIES: usize = 8;
 
 const CONFIRM_DELAY: u64 = 500;
 const GATEWAY_DELAY: u64 = 0;
@@ -57,18 +57,9 @@ impl Miner {
         let mut send_client = self.rpc_client.clone();
 
         // Return error, if balance is zero
-        if let Ok(balance) = client.get_balance(&fee_payer.pubkey()).await {
-            if balance <= sol_to_lamports(MIN_SOL_BALANCE) {
-                panic!(
-                    "{} Insufficient balance: {} SOL\nPlease top up with at least {} SOL",
-                    "ERROR".bold().red(),
-                    lamports_to_sol(balance),
-                    MIN_SOL_BALANCE
-                );
-            }
-        }
+        self.check_balance().await;
 
-        // Set compute units
+        // Set compute budget
         let mut final_ixs = vec![];
         match compute_budget {
             ComputeBudget::Dynamic => {
@@ -79,14 +70,12 @@ impl Miner {
             }
         }
 
-        let priority_fee = match &self.dynamic_fee_url {
-            Some(_) => self.dynamic_fee().await,
-            None => self.priority_fee.unwrap_or(0),
-        };
-
+        // Set compute unit price
         final_ixs.push(ComputeBudgetInstruction::set_compute_unit_price(
-            priority_fee,
+            self.priority_fee.unwrap_or(0),
         ));
+
+        // Add in user instructions
         final_ixs.extend_from_slice(ixs);
 
         // Add jito tip
@@ -129,33 +118,10 @@ impl Miner {
         };
         let mut tx = Transaction::new_with_payer(&final_ixs, Some(&fee_payer.pubkey()));
 
-        // Sign tx
-        let (hash, _slot) = client
-            .get_latest_blockhash_with_commitment(self.rpc_client.commitment())
-            .await
-            .unwrap();
-
-        if signer.pubkey() == fee_payer.pubkey() {
-            tx.sign(&[&signer], hash);
-        } else {
-            tx.sign(&[&signer, &fee_payer], hash);
-        }
-
         // Submit tx
         let mut attempts = 0;
         loop {
-            let message = match &self.dynamic_fee_url {
-                Some(_) => format!(
-                    "Submitting transaction... (attempt {} with dynamic priority fee of {} via {})",
-                    attempts,
-                    priority_fee,
-                    self.dynamic_fee_strategy.as_ref().unwrap()
-                ),
-                None => format!(
-                    "Submitting transaction... (attempt {} with static priority fee of {})",
-                    attempts, priority_fee
-                ),
-            };
+            progress_bar.set_message(format!("Submitting transaction... (attempt {})", attempts,));
 
             // Sign tx with a new blockhash (after approximately ~45 sec)
             if attempts % 10 == 0 {
@@ -305,6 +271,24 @@ impl Miner {
                     request: None,
                     kind: ClientErrorKind::Custom("Max retries".into()),
                 });
+            }
+        }
+    }
+
+    pub async fn check_balance(&self) {
+        // Throw error if balance is less than min
+        if let Ok(balance) = self
+            .rpc_client
+            .get_balance(&self.fee_payer().pubkey())
+            .await
+        {
+            if balance <= sol_to_lamports(MIN_SOL_BALANCE) {
+                panic!(
+                    "{} Insufficient balance: {} SOL\nPlease top up with at least {} SOL",
+                    "ERROR".bold().red(),
+                    lamports_to_sol(balance),
+                    MIN_SOL_BALANCE
+                );
             }
         }
     }
