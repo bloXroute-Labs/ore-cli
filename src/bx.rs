@@ -34,7 +34,7 @@ impl Miner {
             },
             "skipPreFlight": skip_pre_flight,
             "useStakedRPCs": use_staked_rpcs,
-            "tip": 1000000
+            "tip": 5000
         });
 
         println!("auth token {}", auth_token);
