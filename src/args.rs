@@ -3,9 +3,8 @@ use clap::{arg, Parser};
 #[derive(Parser, Debug)]
 pub struct BalanceArgs {
     #[arg(
-        long,
         value_name = "ADDRESS",
-        help = "The address of the account to fetch the balance of"
+        help = "The account address to fetch the balance of."
     )]
     pub address: Option<String>,
 }
@@ -28,7 +27,6 @@ pub struct BussesArgs {}
 #[derive(Parser, Debug)]
 pub struct ClaimArgs {
     #[arg(
-        long,
         value_name = "AMOUNT",
         help = "The amount of rewards to claim. Defaults to max."
     )]
@@ -37,7 +35,7 @@ pub struct ClaimArgs {
     #[arg(
         long,
         value_name = "WALLET_ADDRESS",
-        help = "Wallet to receive claimed tokens."
+        help = "Wallet address to receive claimed tokens."
     )]
     pub to: Option<String>,
 }
@@ -62,8 +60,8 @@ pub struct MineArgs {
     #[arg(
         long,
         short,
-        value_name = "THREAD_COUNT",
-        help = "The number of CPU threads to allocate to mining",
+        value_name = "CORES_COUNT",
+        help = "The number of CPU cores to allocate to mining.",
         default_value = "1"
     )]
     pub threads: u64,
@@ -72,10 +70,16 @@ pub struct MineArgs {
         long,
         short,
         value_name = "SECONDS",
-        help = "The number seconds before the deadline to stop mining and start submitting",
+        help = "The number seconds before the deadline to stop mining and start submitting.",
         default_value = "5"
     )]
     pub buffer_time: u64,
+}
+
+#[derive(Parser, Debug)]
+pub struct ProofArgs {
+    #[arg(value_name = "ADDRESS", help = "The address of the proof to fetch.")]
+    pub address: Option<String>,
 }
 
 #[derive(Parser, Debug)]
@@ -84,18 +88,29 @@ pub struct RewardsArgs {}
 #[derive(Parser, Debug)]
 pub struct StakeArgs {
     #[arg(
-        long,
         value_name = "AMOUNT",
-        help = "The amount of Ore to stake. Defaults to max."
+        help = "The amount of ORE to stake. Defaults to max."
     )]
     pub amount: Option<f64>,
 
     #[arg(
         long,
         value_name = "TOKEN_ACCOUNT_ADDRESS",
-        help = "Token account to send Ore from."
+        help = "Token account to send ORE from. Defaults to the associated token account."
     )]
-    pub sender: Option<String>,
+    pub token_account: Option<String>,
+}
+
+#[derive(Parser, Debug)]
+pub struct TransferArgs {
+    #[arg(value_name = "AMOUNT", help = "The amount of ORE to transfer.")]
+    pub amount: f64,
+
+    #[arg(
+        value_name = "RECIPIENT_ADDRESS",
+        help = "The account address of the receipient."
+    )]
+    pub to: String,
 }
 
 #[cfg(feature = "admin")]
@@ -107,9 +122,8 @@ pub struct UpdateAdminArgs {
 #[derive(Parser, Debug)]
 pub struct UpgradeArgs {
     #[arg(
-        long,
         value_name = "AMOUNT",
-        help = "The amount of Ore to upgrade from v1 to v2. Defaults to max."
+        help = "The amount of ORE to upgrade from v1 to v2. Defaults to max."
     )]
     pub amount: Option<f64>,
 }
