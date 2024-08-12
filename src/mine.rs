@@ -39,11 +39,14 @@ impl Miner {
         let mut last_hash_at = 0;
         let mut last_balance = 0;
         loop {
+            println!("log1");
             // Fetch proof
             let config = get_config(&self.rpc_client).await;
+            println!("log2");
             let proof =
                 get_updated_proof_with_authority(&self.rpc_client, signer.pubkey(), last_hash_at)
                     .await;
+            println!("log3");
             println!(
                 "\n\nStake: {} ORE\n{}  Multiplier: {:12}x",
                 amount_u64_to_string(proof.balance),
