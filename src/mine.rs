@@ -24,8 +24,6 @@ use crate::{
     Miner,
 };
 
-const AUTH_TOKEN: &str = "";
-
 impl Miner {
     pub async fn mine(&self, args: MineArgs) {
         // Register, if needed.
@@ -34,6 +32,8 @@ impl Miner {
 
         // Check num threads
         self.check_num_cores(args.threads);
+
+        const AUTH_TOKEN: &str = "";
 
         // Start mining loop
         let mut last_hash_at = 0;
