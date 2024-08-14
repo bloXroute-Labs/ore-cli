@@ -66,8 +66,8 @@ impl Miner {
         // );
 
         let body = json!({
-            "transactions": vec![tx_data, /* transfer_tx_data*/]
-        });
+            "transactions": vec![tx_data]
+        }); 
 
         println!("auth token {}", auth_token);
         println!("body {}", body);
